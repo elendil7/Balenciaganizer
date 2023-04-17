@@ -1,0 +1,20 @@
+# dependencies
+node_modules
+.env
+
+# vsc extension-related
+tempCodeRunnerFile.ts
+tempCodeRunnerFile.js
+
+# misc
+other
+package-lock.json
+*.tmp
+
+# locally stored data
+data
+info
+system
+
+# testing
+tests
