@@ -1,7 +1,9 @@
 import getEnv from './getEnv';
 
 // create consts for environment variables
-export const OPENAI_API_KEY = getEnv('OPENAI_API_KEY');
+export const OPENAI_APIKEY = getEnv('OPENAI_APIKEY');
+export const ELEVENLABS_APIKEY = getEnv('ELEVENLABS_APIKEY');
+export const D_ID_APIKEY = getEnv('D_ID_APIKEY');
 
 // create enum for emoji symbols (hammer, checkmark, failure, etc.)
 export enum Emoji {
