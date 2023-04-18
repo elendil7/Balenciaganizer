@@ -10,10 +10,13 @@
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
+		"debug": "^4.3.4",
 		"dotenv": "^16.0.3",
-		"openai": "^3.2.1"
+		"openai": "^3.2.1",
+		"undici": "^5.21.2"
 	},
 	"devDependencies": {
+		"@types/debug": "^4.1.7",
 		"@types/node": "^18.15.11"
 	}
 }
