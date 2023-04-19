@@ -1,8 +1,6 @@
 import { OpenAIApi } from 'openai';
 import AuthorizeUser from '../api/openai/v1/controllers/AuthorizeUser';
-import { config } from '../../config';
-import { chatGPTQuotePrompt } from '../util/chatGPTConstants';
-import { writeFileSync } from 'fs';
+import GenerateCharacterQuotes from '../api/openai/v1/controllers/GenerateCharacterQuotes';
 
 export default class OpenAIEngine {
 	private openai: OpenAIApi;
@@ -19,23 +17,49 @@ export default class OpenAIEngine {
 		return this.openai;
 	}
 
-	// ! TODO - outsource this to controllers directory (e.g., GetCharacterQuotes.ts).
-	// ! TODO - find way to parse string into JSON object (so we can access each individual key value pair)
-	public async generateChatCompletionResponse() {
-		const completion = await this.getOpenAI().createChatCompletion({
-			model: config.chatgptModel || 'gpt-3.5-turbo',
-			messages: [
-				{
-					role: 'user',
-					content: chatGPTQuotePrompt('Mission impossible'),
-				},
-			],
-		});
+	// ! TODO - make separate method for getting user input (use polymorphism & previous project for reference).
+	// ! TODO - call the getUserInput method inside the GenerateCharacterQuotes method in the /controllers directory, or in this file (OpenAIEngine.ts) in the generateChatCompletionResponse method (TBD)
 
-		const data = completion.data.choices[0].message;
+	public async generateChatCompletionResponse(mediaName: string) {
+		// log message
+		console.log(
+			'Generating character quotes... for media name: ',
+			mediaName
+		);
 
-		console.log(data);
+		const quotes = await GenerateCharacterQuotes(
+			this.getOpenAI(),
+			mediaName
+		);
 
-		// parse the data string above into a JSON object (so we can access each individual key value pair)
+		if (!quotes || !quotes.content) {
+			console.log('Quotes generation failed. Retrying...');
+			this.generateChatCompletionResponse(mediaName);
+		} else {
+			console.log('Quotes generation successful!');
+			return quotes.content;
+		}
+
+		if (quotes) {
+			// if invalidMediaName, then reattempt
+			if (
+				quotes.content
+					.replace(/\s/g, '')
+					.toLowerCase()
+					.includes('invalidmedia')
+			) {
+				console.log('Invalid media name. Reattempting...\n\n');
+				this.generateChatCompletionResponse(mediaName);
+			} else {
+				console.log("Generation complete! Here's what we got: ");
+
+				// parse JSON object
+				const data = JSON.parse(quotes.content);
+				console.log(data);
+			}
+		} else {
+			console.log('Generation failed. Reattempting...\n\n');
+			this.generateChatCompletionResponse(mediaName);
+		}
 	}
 }
