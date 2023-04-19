@@ -1,4 +1,5 @@
 import OpenAIEngine from './core/OpenAIEngine';
+import { AsciiArt, Emoji } from './util/constants';
 
 export default class BalenciaganizerEngine {
 	private OpenAIEngine: OpenAIEngine;
@@ -8,25 +9,21 @@ export default class BalenciaganizerEngine {
 		this.OpenAIEngine = new OpenAIEngine();
 	}
 
-	public run() {
-		let quotes: string;
+	public async run() {
+		console.log(`\n\n${AsciiArt.BALENCIGANIZER_LOGO}`);
 
-		// prompt for user input (media name to generate character quotes for)
-		// use readline to get user input
-		const readline = require('readline').createInterface({
-			input: process.stdin,
-			output: process.stdout,
-		});
-		// get input from user
-		readline.question('Enter media name: ', async (mediaName: string) => {
-			// run OpenAIEngine's getChatCompletionResponse method
-			// @ts-ignore
-			quotes = await this.OpenAIEngine.generateChatCompletionResponse(
-				mediaName
-			);
+		console.log("\n\nWelcome to Balenciaganizer! Let's get started!");
 
-			// close readline
-			readline.close();
-		});
+		while (true) {
+			// run OpenAIEngine's getChatCompletionResponse method to attain quotes
+			const quotes =
+				await this.OpenAIEngine.generateChatCompletionResponse(
+					'',
+					true
+				);
+
+			// log quotes
+			console.log(`\n${Emoji.FAST_FORWARD} Here are the quotes:`, quotes);
+		}
 	}
 }
