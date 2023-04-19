@@ -1,6 +1,8 @@
 import { OpenAIApi } from 'openai';
 import AuthorizeUser from '../api/openai/v1/controllers/AuthorizeUser';
 import GenerateCharacterQuotes from '../api/openai/v1/controllers/GenerateCharacterQuotes';
+import { Emoji, Links } from '../util/constants';
+import UserInputReader from '../util/UserInputReader';
 
 export default class OpenAIEngine {
 	private openai: OpenAIApi;
@@ -17,49 +19,67 @@ export default class OpenAIEngine {
 		return this.openai;
 	}
 
-	// ! TODO - make separate method for getting user input (use polymorphism & previous project for reference).
-	// ! TODO - call the getUserInput method inside the GenerateCharacterQuotes method in the /controllers directory, or in this file (OpenAIEngine.ts) in the generateChatCompletionResponse method (TBD)
+	public async generateChatCompletionResponse(
+		mediaName: string,
+		repromptUser: boolean
+	): Promise<any> {
+		// if mediaName is empty (or invalid (this function is called recursively)), then prompt user for a valid media name
+		if (repromptUser) {
+			// create new instance of UserInputReader
+			const userInputReader = new UserInputReader();
 
-	public async generateChatCompletionResponse(mediaName: string) {
+			// get mediaName input from user
+			mediaName = await userInputReader.askForStringInput(
+				`\n${Emoji.WORDS} Enter the name of a movie/show/book: `,
+				2,
+				50
+			);
+
+			// close the readline interface
+			userInputReader.close();
+		}
+
 		// log message
 		console.log(
-			'Generating character quotes... for media name: ',
-			mediaName
+			`${Emoji.HOURGLASS} Generating character quotes for media name: "${mediaName}"`
 		);
 
+		// get quotes using the media name given by the user
 		const quotes = await GenerateCharacterQuotes(
 			this.getOpenAI(),
 			mediaName
 		);
 
+		// if quotes is null, then reattempt (chatgpt API error handling - failed to return quotes)
 		if (!quotes || !quotes.content) {
-			console.log('Quotes generation failed. Retrying...');
-			this.generateChatCompletionResponse(mediaName);
-		} else {
-			console.log('Quotes generation successful!');
-			return quotes.content;
+			console.log(
+				`${Emoji.FAILURE} Quotes generation failed. Retrying... ${Emoji.HOURGLASS}`
+			);
+			return this.generateChatCompletionResponse(mediaName, false);
 		}
 
-		if (quotes) {
-			// if invalidMediaName, then reattempt
-			if (
-				quotes.content
-					.replace(/\s/g, '')
-					.toLowerCase()
-					.includes('invalidmedia')
-			) {
-				console.log('Invalid media name. Reattempting...\n\n');
-				this.generateChatCompletionResponse(mediaName);
-			} else {
-				console.log("Generation complete! Here's what we got: ");
+		// get quotes.content as a string and sanitize it (remove all whitespace and convert to lowercase)
+		const quotesContent = quotes.content.replace(/\s/g, '').toLowerCase();
 
-				// parse JSON object
-				const data = JSON.parse(quotes.content);
-				console.log(data);
-			}
-		} else {
-			console.log('Generation failed. Reattempting...\n\n');
-			this.generateChatCompletionResponse(mediaName);
+		// if chatgpt returns the hashcode relating to ALL other unexpected errors, prompt user to report issue, and reattempt
+		if (quotesContent.includes('3b8f57abeb293cbe2c5b67ca554e79933')) {
+			console.error(
+				`${Emoji.SIREN} Unexpected error - this shouldn't happen! Please raise an issue on the GitHub page: "${Links.GITHUB_REPO}/issues" ${Emoji.SKULL_AND_CROSSBONES}`
+			);
+		}
+		// if chatgpt returns the hashcode relating to invalid media name, then reprompt the user for a valid media name
+		else if (quotesContent.includes('c5b67ca554e79933b8f57abeb293cbe2')) {
+			// reprompt the user for a valid media name, by rerunning this very method
+			console.error(
+				`${Emoji.FAILURE} Invalid media name. Please try again.`
+			);
+			return this.generateChatCompletionResponse(mediaName, true);
+		}
+		// else return the quotes (all checks passed)
+		else {
+			console.log(`${Emoji.CHECKMARK} Quotes generation successful!`);
+
+			return JSON.parse(quotes.content);
 		}
 	}
 }
