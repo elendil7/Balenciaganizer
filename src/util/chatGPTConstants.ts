@@ -1,6 +1,6 @@
 export const chatGPTQuotePrompt = (
 	mediaName: string
-) => `Generate quotes by characters from the following film/TV show: "${mediaName}".
+) => `Generate quotes by characters from the following film/TV show: "${mediaName}". If the film/TV show is invalid, return "Invalid media name." and nothing more.
 
 Requirements:
 - Output no additional information besides the quotes, in the following format: a JSON object {} with each key being the name of the character (string), and each value being an array [] of quotes (each quote being a string).
