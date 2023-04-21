@@ -14,6 +14,7 @@ export default class BalenciaganizerEngine {
 
 		console.log("\n\nWelcome to Balenciaganizer! Let's get started!");
 
+		// run indefinitely (until the program is terminated)
 		while (true) {
 			// run OpenAIEngine's getChatCompletionResponse method to attain quotes
 			const quotes =

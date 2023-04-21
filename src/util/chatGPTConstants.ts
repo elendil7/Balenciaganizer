@@ -15,6 +15,6 @@ Ok, now this is a prompt that I use to generate images from another AI image gen
 
 I want you to rewrite the prompt but for every character, with the clothes you chose for them. Remember to write the prompt exactly as I pasted it, with the same format and parameters. Only change the gender of the model, the name of the character, and the description of the clothing.
 
-Your resopnse must be in the following format: a JSON object with the keys being the character names, and the values being the quotes respectively. Don't include anything else in the response. Ensure that your response can be parsed as a JSON object (JSON.parse(response) in JavaScript).
+Your resopnse must be in the following format: a JSON object with the keys being the character names, and the values being the prompts respectively. Don't include anything else in the response. Ensure that your response can be parsed as a JSON object (JSON.parse(response) in JavaScript).
 
 Remember, I'm not asking you to generate any images. Only text prompts.`;
